@@ -11,7 +11,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MyService: Service() {
+class MyService : Service() {
     private val scope = CoroutineScope(Dispatchers.IO)
     override fun onBind(intent: Intent?): IBinder? {
         TODO("Not yet implemented")
@@ -21,15 +21,17 @@ class MyService: Service() {
         super.onCreate()
         log("onCreate")
     }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         log("onStartCommand")
+        val start = intent?.getIntExtra(EXTRA_START, 0) ?: 0
         scope.launch {
-            for (i in 0..100) {
+            for (i in start..start + 100) {
                 delay(1000)
                 log("Timer $i")
             }
         }
-        return super.onStartCommand(intent, flags, startId)
+        return START_REDELIVER_INTENT
     }
 
     override fun onDestroy() {
@@ -37,12 +39,17 @@ class MyService: Service() {
         log("onDestroy")
         scope.cancel()
     }
-    private fun log(message:String){
-        Log.d("SERVICE_TAG","MyService: $message")
+
+    private fun log(message: String) {
+        Log.d("SERVICE_TAG", "MyService: $message")
     }
-    companion object{
-        fun newIntent(context: Context):Intent{
-            return Intent(context,MyService::class.java)
+
+    companion object {
+        private const val EXTRA_START = "start"
+        fun newIntent(context: Context, start: Int): Intent {
+            return Intent(context, MyService::class.java).apply {
+                putExtra(EXTRA_START, start)
+            }
         }
     }
 }
