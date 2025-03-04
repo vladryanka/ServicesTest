@@ -2,8 +2,10 @@ package com.smorzhok.servicestest
 
 import android.app.job.JobInfo
 import android.app.job.JobScheduler
+import android.app.job.JobWorkItem
 import android.content.ComponentName
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
@@ -40,7 +42,11 @@ class MainActivity : AppCompatActivity() {
                 .setRequiresCharging(true)
                 .build()
             val jobScheduler = getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
-            jobScheduler.schedule(jobInfo)
+
+            val intent = MyJobService.getIntent(this, 2)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                jobScheduler.enqueue(jobInfo, JobWorkItem(intent))
+            }
         }
 
     }
@@ -52,5 +58,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+
 
 }
