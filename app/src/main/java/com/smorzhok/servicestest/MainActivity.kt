@@ -1,5 +1,8 @@
 package com.smorzhok.servicestest
 
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -29,6 +32,15 @@ class MainActivity : AppCompatActivity() {
         }
         binding.intentService.setOnClickListener {
             startService(MyIntentService.newIntent(this))
+        }
+        binding.jobScheduler.setOnClickListener {
+            val compName = ComponentName(this, MyJobService::class.java)
+            val jobInfo = JobInfo.Builder(MyJobService.JOB_ID, compName)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                .setRequiresCharging(true)
+                .build()
+            val jobScheduler = getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
+            jobScheduler.schedule(jobInfo)
         }
 
     }
