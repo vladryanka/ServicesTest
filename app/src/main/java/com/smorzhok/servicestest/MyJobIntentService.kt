@@ -18,8 +18,8 @@ class MyJobIntentService : JobIntentService() {
     }
 
     override fun onHandleWork(intent: Intent) {
-        log("onStartCommand")
-        val page = intent.getIntExtra(PAGE, 0) ?: 0
+        log("onHandleWork")
+        val page = intent.getIntExtra(PAGE, 0)
         for (i in 0..5) {
             Thread.sleep(1000)
             log("Timer $i $page")
