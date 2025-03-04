@@ -17,6 +17,8 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
+    private var page = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,10 +45,15 @@ class MainActivity : AppCompatActivity() {
                 .build()
             val jobScheduler = getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
 
-            val intent = MyJobService.getIntent(this, 2)
+            val intent = MyJobService.getIntent(this, page++)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 jobScheduler.enqueue(jobInfo, JobWorkItem(intent))
+            } else {
+                startService(MyIntentService2.newIntent(this, page++))
             }
+        }
+        binding.jobIntentService.setOnClickListener {
+            MyJobIntentService.enqueue(this,page++)
         }
 
     }
