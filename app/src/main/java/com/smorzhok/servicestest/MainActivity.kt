@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
     private var page = 0
-
+    //debug services are allowed in App Inspection
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.jobIntentService.setOnClickListener {
-            MyJobIntentService.enqueue(this,page++)
+            MyJobIntentService.enqueue(this, page++)
         }
         binding.workManager.setOnClickListener {
             val workManager = WorkManager.getInstance(applicationContext)
