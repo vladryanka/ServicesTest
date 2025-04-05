@@ -1,6 +1,5 @@
 package com.smorzhok.servicestest
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -18,27 +17,34 @@ import kotlinx.coroutines.launch
 
 class MyForegroundService : Service() {
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    private val notificationManager by lazy {
+        getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         TODO("Not yet implemented")
+    }
+
+    private val notificatoinBuilder by lazy {
+        createNotificationBuilder()
     }
 
     override fun onCreate() {
         super.onCreate()
         log("onCreate")
         createNotificationChannel()
-        val notification = createNotification()
-        startForeground(NOTIFICATION_ID, notification)
+        startForeground(NOTIFICATION_ID, notificatoinBuilder.build())
     }
 
-    private fun createNotification(): Notification{
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Title")
-            .setContentText("Text")
-            .setSmallIcon(R.drawable.ic_launcher_background)
-            .build()
-    }
-    private fun createNotificationChannel(){
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    private fun createNotificationBuilder() = NotificationCompat.Builder(this, CHANNEL_ID)
+        .setContentTitle("Title")
+        .setContentText("Text")
+        .setSmallIcon(R.drawable.ic_launcher_background)
+        .setProgress(100, 0, false)
+        .setOnlyAlertOnce(true)
+
+    private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notChannel = NotificationChannel(
                 CHANNEL_ID, CHANNEL_NAME,
@@ -51,8 +57,12 @@ class MyForegroundService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         log("onStartCommand")
         scope.launch {
-            for (i in 0.. 3) {
+            for (i in 0..100 step 5) {
                 delay(1000)
+                val notification = notificatoinBuilder
+                    .setProgress(100, i, false)
+                    .build()
+                notificationManager.notify(NOTIFICATION_ID, notification)
                 log("Timer $i")
             }
             stopSelf()
