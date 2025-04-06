@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -22,8 +23,16 @@ class MyForegroundService : Service() {
         getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        TODO("Not yet implemented")
+
+    var onProgressChanged: ((Int) -> Unit)? = null
+
+    override fun onBind(intent: Intent?): IBinder {
+        return LocalBinder()
+    }
+
+
+    inner class LocalBinder(): Binder() {
+        fun getBinder() = this@MyForegroundService
     }
 
     private val notificatoinBuilder by lazy {
@@ -63,6 +72,7 @@ class MyForegroundService : Service() {
                     .setProgress(100, i, false)
                     .build()
                 notificationManager.notify(NOTIFICATION_ID, notification)
+                onProgressChanged?.invoke(i)
                 log("Timer $i")
             }
             stopSelf()

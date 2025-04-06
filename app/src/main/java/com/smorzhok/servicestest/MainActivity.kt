@@ -5,8 +5,10 @@ import android.app.job.JobScheduler
 import android.app.job.JobWorkItem
 import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
@@ -20,7 +22,21 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
     private var page = 0
-    //debug services are allowed in App Inspection
+
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = (service as? MyForegroundService.LocalBinder) ?: return
+            val foregroundService = binder.getBinder()
+            foregroundService.onProgressChanged = {progress->
+                binding.progressBarLoading.progress = progress
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+        }
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +82,20 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        bindService(
+            MyForegroundService.newIntent(this),
+            serviceConnection,
+            0
+            )
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unbindService(serviceConnection)
     }
 
     private fun requestNotificationPermission() {
